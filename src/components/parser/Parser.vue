@@ -101,6 +101,24 @@ function setValue(event, config, scheme) {
   this.$set(this[this.formConf.formModel], scheme.__vModel__, event)
 }
 
+function setUpload(event, config, scheme) {
+  this.$set(config, 'defaultValue', event)
+  this.$set(this[this.formConf.formModel], scheme.__vModel__, event)
+  const index = this.formConfCopy.fields.findIndex(el => el.__vModel__ === scheme.__vModel__)
+  if (index >= 0) this.formConfCopy.fields[index]['file-list'] = event
+}
+
+function setDeleteUpload(event, config, scheme) {
+  this.$set(config, 'defaultValue', event)
+  this.$set(this[this.formConf.formModel], scheme.__vModel__, event)
+  const index = this.formConfCopy.fields.findIndex(el => el.__vModel__ === scheme.__vModel__)
+  if (index >= 0) this.formConfCopy.fields[index]['file-list'] = event
+}
+
+function setPreview(event, config, scheme) {
+  window.open(window.location.origin + event.url)
+}
+
 function buildListeners(scheme) {
   const config = scheme.__config__
   const methods = this.formConf.__methods__ || {}
@@ -112,6 +130,12 @@ function buildListeners(scheme) {
   })
   // 响应 render.js 中的 vModel $emit('input', val)
   listeners.input = event => setValue.call(this, event, config, scheme)
+
+  listeners.upload = event => setUpload.call(this, event, config, scheme)
+
+  listeners.deleteUpload = event => setDeleteUpload.call(this, event, config, scheme)
+
+  listeners.preview = event => setPreview.call(this, event, config, scheme)
 
   return listeners
 }

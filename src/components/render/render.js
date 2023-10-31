@@ -14,7 +14,25 @@ keys.forEach(key => {
   componentChild[tag] = value
 })
 
-function vModel(dataObject, defaultValue) {
+function vModel(dataObject, defaultValue, config) {
+  if (config !== undefined && config !== null && config !== '' && config.tag === 'el-upload') {
+    dataObject.attrs['on-success'] = (response, file, fileList) => {
+      const data = fileList.map(el => ({ name: el.name, url: el.response ? el.response.path : el.url }))
+      this.$emit('upload', data)
+    }
+    dataObject.attrs['on-remove'] = (file, fileList) => {
+      const data = fileList.map(el => ({ name: el.name, url: el.url }))
+      this.$emit('deleteUpload', data)
+    }
+    dataObject.attrs['on-preview'] = file => {
+      this.$emit('preview', file)
+    }
+    if (defaultValue !== undefined && defaultValue !== null && defaultValue !== '') {
+      dataObject.attrs['file-list'] = defaultValue
+    }
+    return
+  }
+
   dataObject.props.value = defaultValue
 
   dataObject.on.input = val => {
@@ -50,7 +68,7 @@ function buildDataObject(confClone, dataObject) {
   Object.keys(confClone).forEach(key => {
     const val = confClone[key]
     if (key === '__vModel__') {
-      vModel.call(this, dataObject, confClone.__config__.defaultValue)
+      vModel.call(this, dataObject, confClone.__config__.defaultValue, confClone.__config__)
     } else if (dataObject[key] !== undefined) {
       if (dataObject[key] === null
         || dataObject[key] instanceof RegExp
